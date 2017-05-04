@@ -1,8 +1,13 @@
+// Let's scrape the NYTimes together!
+// Here's a quick tutorial that got me started https://scotch.io/tutorials/scraping-the-web-with-node-js
+// And the documentation for our scraper, Cheerio, that can help if we get stuck! https://cheerio.js.org/
+
 var express = require('express');
 var fs = require('fs');
 var request = require('request-promise');
 var cheerio = require('cheerio');
 var app     = express();
+var assign = require('./lib/assigners.js')
 
 var trumpTweets = {
   id: [], // will need to be assigned by us
@@ -14,15 +19,24 @@ var trumpTweets = {
 }
 
 app.get('/', function(req, res) {
-  res.send('WELCOME TO THE WEB')
+  res.send('WELCOME TO THE WEB! Go to "/scrape" to start the scrape!')
 })
 
 app.get('/scrape', function(req, res) {
    url = 'https://www.nytimes.com/interactive/2016/01/28/upshot/donald-trump-twitter-insults.html';
 
+   //loading our assignment functions library
+   assign.idAssign();
+   assign.genderAssign();
+   assign.categoryAssign();
+   assign.titleAssign();
+
+
    // We are going to use a promise so we can completely construct our object before we send it to D3 for viz processing
    // Due to the multiple asynchronous requests we are making, if we don't use promises,
    // the code would send the object before it's filled with data
+
+   // An Express/Promise lesson https://coderwall.com/p/9cifuw/scraping-web-pages-using-node-js-using-request-promise
 
    requestPromise(url).then(function(data) {
      //Send the entire object after the asynchronous request is resolved
@@ -75,7 +89,6 @@ app.get('/scrape', function(req, res) {
   }
 })
 
-//Daa retrieval function
 
 //Scraping functions
 function scrapeNames($) {
