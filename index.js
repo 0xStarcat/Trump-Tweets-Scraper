@@ -91,7 +91,13 @@ function scrapeTitles($) {
 }
 
 function scrapeTweets($) {
-
+  $('.g-insult-container').each(function(i, elem) {
+    var tweetSet = []
+    $(elem).find('a').each(function(i, elem) {
+      tweetSet[i] = $(this).text()
+    })
+    trumpTweets.tweets[i] = tweetSet
+  });
 }
 
 app.listen('8080')
