@@ -79,9 +79,7 @@ app.get('/scrape', function(req, res) {
 
 //Scraping functions
 function scrapeNames($) {
-  $('.g-entity-name').each(function(i, elem) {
-    trumpTweets.name[i] = $(this).text();
-  });
+
 }
 
 function scrapeCategories($) {
@@ -93,13 +91,7 @@ function scrapeTitles($) {
 }
 
 function scrapeTweets($) {
-  $('.g-insult-container').each(function(i, elem) {
-    var tweetSet = []
-    $(elem).find('a').each(function(i, elem) {
-      tweetSet[i] = $(this).text()
-    })
-    trumpTweets.tweets[i] = tweetSet
-  });
+
 }
 
 app.listen('8080')
