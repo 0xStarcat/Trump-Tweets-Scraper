@@ -25,13 +25,6 @@ app.get('/', function(req, res) {
 app.get('/scrape', function(req, res) {
    url = 'https://www.nytimes.com/interactive/2016/01/28/upshot/donald-trump-twitter-insults.html';
 
-   //loading our assignment functions library
-   assign.idAssign();
-   assign.genderAssign();
-   assign.categoryAssign();
-   assign.titleAssign();
-
-
    // We are going to use a promise so we can completely construct our object before we send it to D3 for viz processing
    // Due to the multiple asynchronous requests we are making, if we don't use promises,
    // the code would send the object before it's filled with data
@@ -39,7 +32,7 @@ app.get('/scrape', function(req, res) {
    // An Express/Promise lesson https://coderwall.com/p/9cifuw/scraping-web-pages-using-node-js-using-request-promise
 
    requestPromise(url).then(function(data) {
-     console.log(trumpTweets)
+    //  console.log(trumpTweets)
      //Send the entire object after the asynchronous request is resolved
      res.write('IDs: ('+trumpTweets.id.length.toString()+' sets assigned)'+'\n')
      res.write(trumpTweets.id.toString())
@@ -79,8 +72,7 @@ app.get('/scrape', function(req, res) {
        request({url, jar: true}, function(error, response, html) {
           if(!error) {
             var $ = cheerio.load(html);
-            scrapeNames($)
-            scrapeTweets($)
+            scrapeEntities($)
             resolve(trumpTweets.name)
           } else {
             reject(error)
@@ -92,27 +84,51 @@ app.get('/scrape', function(req, res) {
 
 
 //Scraping functions
-function scrapeNames($) {
-
-}
-
-function scrapeCategories($) {
-
-}
-
-function scrapeTitles($) {
-
-}
-
-function scrapeTweets($) {
-  $('.g-insult-container').each(function(i, elem) {
-    var tweetSet = []
-    $(elem).find('a').each(function(i, elem) {
-      tweetSet[i] = $(this).text()
+function scrapeEntities($) {
+  var entities = []
+  $('.g-entity-item').each(function(i, elem) {
+    var entity = {
+      id: i,
+      name: "",
+      title: "",
+      category: "",
+      gender: "",
+      tweets: []
+    }
+    $(elem).find('.g-entity-name').each(function(i, elem) {
+      entity.name = $(this).text()
     })
-    trumpTweets.tweets[i] = tweetSet
+
+    $(elem).find('.g-entity-title').each(function(i, elem) {
+      entity.title = $(this).text()
+    })
+
+    $(elem).find('.g-insult-container').each(function(i, elem) {
+      var tweetSet = []
+      $(elem).find('a').each(function(i, elem) {
+        tweetSet[i] = $(this).text()
+      })
+      entity.tweets = tweetSet
+      console.log(entity)
+    });
+
+    entities.push(entity)
   });
+  assignEntities(entities)
 }
+
+function assignEntities(entities) {
+  var entities = entities;
+
+  entities = assign.assign(entities)
+  for (var i = 0; i < entities.length; i++) {
+    entities[i] = assign.assign(entities[i]);
+    console.log(entities[i])
+    console.log('Missing assignments: ' + assign.missing)
+  }
+}
+
+
 
 app.listen('8080')
 
