@@ -8,15 +8,9 @@ var request = require('request-promise');
 var cheerio = require('cheerio');
 var app     = express();
 var assign = require('./lib/assigners.js')
+var fs = require('fs');
 
-var trumpTweets = {
-  id: [], // will need to be assigned by us
-  name: [],
-  category: [], //  will need to be assigned by us
-  title: [], // some will be missing, need to be assigned
-  gender: [], //  will need to be assigned by us
-  tweets: [] //number of tweets can be from this.count
-}
+var trumpTweets = []
 
 app.get('/', function(req, res) {
   res.send('WELCOME TO THE WEB! Go to "/scrape" to start the scrape!')
@@ -32,32 +26,14 @@ app.get('/scrape', function(req, res) {
    // An Express/Promise lesson https://coderwall.com/p/9cifuw/scraping-web-pages-using-node-js-using-request-promise
 
    requestPromise(url).then(function(data) {
-    //  console.log(trumpTweets)
-     //Send the entire object after the asynchronous request is resolved
-     res.write('IDs: ('+trumpTweets.id.length.toString()+' sets assigned)'+'\n')
-     res.write(trumpTweets.id.toString())
-     res.write('\n///////////////////////////////////////\n\n')
-     res.write('NAMES: ('+trumpTweets.name.length.toString()+' sets retrieved)'+'\n')
-     res.write('********\n')
-     res.write(trumpTweets.name.toString())
-     res.write('\n///////////////////////////////////////\n\n')
-     res.write('CATEGORIES: ('+trumpTweets.category.length.toString()+' sets retrieved)'+'\n')
-     res.write('********\n')
-     res.write(trumpTweets.category.toString())
-     res.write('\n///////////////////////////////////////\n\n')
-     res.write('TITLE: ('+trumpTweets.title.length.toString()+' sets retrieved)'+'\n')
-     res.write('********\n')
-     res.write(trumpTweets.title.toString())
-     res.write('\n///////////////////////////////////////\n\n')
-     res.write('GENDER: ('+trumpTweets.gender.length.toString()+' sets assigned)'+'\n')
-     res.write('********\n')
-     res.write(trumpTweets.gender.toString())
-     res.write('\n///////////////////////////////////////\n\n')
-     res.write('TWEETS: ('+trumpTweets.tweets.length.toString()+' sets retrieved)'+'\n')
-     res.write('********\n')
-     res.write(trumpTweets.tweets.toString())
-     res.write('\n///////////////////////////////////////\n')
-     res.end()
+     //Write the data to a file when asynchronous request is resolved
+      fs.writeFile('../TRPtweets/server/db/trumptweets.json', JSON.stringify(trumpTweets), function(err) {
+        if(err) { return console.log(err); }
+        console.log("The file was saved!");
+      });
+
+     res.send('scrape complete - check the console')
+
    }, function(error) {
         res.send(error)
         console.error("%s; %s", err.message, url);
@@ -88,7 +64,6 @@ function scrapeEntities($) {
   var entities = []
   $('.g-entity-item').each(function(i, elem) {
     var entity = {
-      id: i,
       name: "",
       title: "",
       category: "",
@@ -108,30 +83,28 @@ function scrapeEntities($) {
       $(elem).find('a').each(function(i, elem) {
         tweetSet[i] = $(this).text()
       })
-      entity.tweets = tweetSet
-      console.log(entity)
-    });
+      entity.tweets = JSON.stringify(tweetSet)
+      entity.count = tweetSet.length
 
+    });
     entities.push(entity)
   });
   assignEntities(entities)
 }
 
 function assignEntities(entities) {
-  var entities = entities;
-
-  entities = assign.assign(entities)
   for (var i = 0; i < entities.length; i++) {
     entities[i] = assign.assign(entities[i]);
     console.log(entities[i])
-    console.log('Missing assignments: ' + assign.missing)
   }
+  trumpTweets = entities
+  console.log('Missing assignments: ' + assign.missing)
 }
 
 
 
-app.listen('8080')
+app.listen('8000')
 
-console.log('Magic happens on port 8080');
+console.log('Magic happens on port 8000');
 
 exports = module.exports = app;
