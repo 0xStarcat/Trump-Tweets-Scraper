@@ -39,6 +39,7 @@ app.get('/scrape', function(req, res) {
    // An Express/Promise lesson https://coderwall.com/p/9cifuw/scraping-web-pages-using-node-js-using-request-promise
 
    requestPromise(url).then(function(data) {
+     console.log(trumpTweets)
      //Send the entire object after the asynchronous request is resolved
      res.write('IDs: ('+trumpTweets.id.length.toString()+' sets assigned)'+'\n')
      res.write(trumpTweets.id.toString())
