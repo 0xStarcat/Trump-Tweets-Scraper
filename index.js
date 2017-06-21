@@ -26,10 +26,11 @@ app.get('/scrape', function(req, res) {
    // An Express/Promise lesson https://coderwall.com/p/9cifuw/scraping-web-pages-using-node-js-using-request-promise
 
    requestPromise(url).then(function(data) {
-     //Write the data to a file when asynchronous request is resolved
-      fs.writeFile('../TRPtweets/server/db/trumptweets.json', JSON.stringify(trumpTweets), function(err) {
+      var fileName = '../TRPtweets/server/db/trumptweets.json'
+     // Write the data to a file when asynchronous request is resolved
+      fs.writeFile(fileName, JSON.stringify(trumpTweets), function(err) {
         if(err) { return console.log(err); }
-        console.log("The file was saved!");
+        console.log("The file was saved to " + fileName);
       });
 
      res.send('scrape complete - check the console')
@@ -58,7 +59,6 @@ app.get('/scrape', function(req, res) {
   }
 })
 
-
 //Scraping functions
 function scrapeEntities($) {
   var entities = []
@@ -81,7 +81,7 @@ function scrapeEntities($) {
     $(elem).find('.g-insult-container').each(function(i, elem) {
       var tweetSet = []
       $(elem).find('a').each(function(i, elem) {
-        tweetSet[i] = $(this).text()
+        tweetSet[i] = { tweet: $(this).text(), link: $(this).attr('href') }
       })
       entity.tweets = JSON.stringify(tweetSet)
       entity.count = tweetSet.length
